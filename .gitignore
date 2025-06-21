@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/                 # Important: Ignores your virtual environment folder
+pip-log.txt
+pip-delete-this-arg-not-needed.log
+
+# IDEs
+.idea/                # Important: Ignores PyCharm project configuration files
+.vscode/              # VS Code (if you ever use it)
+
+# Operating System files
+.DS_Store             # macOS
+Thumbs.db             # Windows
+
+# Data
+data/processed/       # Don't commit processed output (can be regenerated)
+# data/raw/*.xlsx     # You might want to include specific raw files if they are large or sensitive
+# data/raw/*.docx
