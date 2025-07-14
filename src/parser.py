@@ -62,6 +62,7 @@ class LaycanParser:
     SECOND_HALF_START_DAY = 16
 
     def __init__(self, default_year: Optional[int] = None):
+        # Use current year by default, but allow override for testing or historical data
         self.default_year = default_year or datetime.now().year
 
     def _get_month_number(self, month_str: str) -> int:
@@ -84,11 +85,16 @@ class LaycanParser:
             month1 = self._get_month_number(month1_str)
             month2 = self._get_month_number(month2_str)
 
-            end_of_month1 = self._get_end_of_month(self.default_year, month1)
-            start_date = end_of_month1 - timedelta(days=self.DAYS_OFFSET_END_MONTH)
-            end_date = datetime(self.default_year, month2, self.EARLY_MONTH_DAY)
+            year1 = self._smart_year_detection(month1)
+            year2 = self._smart_year_detection(month2)
 
-            end_date = self._adjust_year_for_cross_year_dates(start_date, end_date)
+            # If month2 < month1, it's likely next year
+            if month2 < month1:
+                year2 = year1 + 1
+
+            end_of_month1 = self._get_end_of_month(year1, month1)
+            start_date = end_of_month1 - timedelta(days=self.DAYS_OFFSET_END_MONTH)
+            end_date = datetime(year2, month2, self.EARLY_MONTH_DAY)
 
             return {
                 "Laycan Start Date": start_date.strftime('%Y-%m-%d'),
@@ -102,8 +108,10 @@ class LaycanParser:
         """Parse format: '06-10 June'"""
         try:
             month = self._get_month_number(month_str)
-            start_date = datetime(self.default_year, month, int(day1))
-            end_date = datetime(self.default_year, month, int(day2))
+            year = self._smart_year_detection(month)
+
+            start_date = datetime(year, month, int(day1))
+            end_date = datetime(year, month, int(day2))
 
             return {
                 "Laycan Start Date": start_date.strftime('%Y-%m-%d'),
@@ -117,8 +125,10 @@ class LaycanParser:
         """Parse format: '2H June'"""
         try:
             month = self._get_month_number(month_str)
-            start_date = datetime(self.default_year, month, self.SECOND_HALF_START_DAY)
-            end_date = self._get_end_of_month(self.default_year, month)
+            year = self._smart_year_detection(month)
+
+            start_date = datetime(year, month, self.SECOND_HALF_START_DAY)
+            end_date = self._get_end_of_month(year, month)
 
             return {
                 "Laycan Start Date": start_date.strftime('%Y-%m-%d'),
@@ -205,6 +215,7 @@ class ShippingDataParser:
     ]
 
     def __init__(self, default_year: Optional[int] = None):
+        # Use current year by default, but allow override for testing or historical data
         self.laycan_parser = LaycanParser(default_year)
         self.freight_calculator = FreightCalculator()
         # Sort cargos by length (longest first) for better matching
@@ -422,7 +433,7 @@ class ShippingDataParser:
 # Example usage
 if __name__ == "__main__":
     # Example usage
-    parser = ShippingDataParser(default_year=2024)
+    parser = ShippingDataParser()  # Uses current year automatically
 
     sample_data = """
     P66 / Vessel A / 5000 MT UCO / Singapore to Rotterdam / 15-20 June / USD 500 Lumpsum
