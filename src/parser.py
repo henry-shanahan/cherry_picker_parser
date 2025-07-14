@@ -65,6 +65,28 @@ class LaycanParser:
         # Use current year by default, but allow override for testing or historical data
         self.default_year = default_year or datetime.now().year
 
+    def _smart_year_detection(self, month: int) -> int:
+        """
+        Intelligently determine year based on context.
+        If the month is significantly in the past compared to current month,
+        assume it's next year (common in shipping forward bookings).
+        """
+        current_month = self.current_month
+
+        # If we're in December and the laycan is in Jan-March, likely next year
+        if current_month >= 11 and month <= 3:
+            return self.default_year + 1
+
+        # If we're in Jan-Feb and the laycan is in Nov-Dec, likely last year
+        if current_month <= 2 and month >= 11:
+            return self.default_year - 1
+
+        # If the month is more than 2 months in the past, assume next year
+        if month < current_month - 2:
+            return self.default_year + 1
+
+        return self.default_year
+
     def _get_month_number(self, month_str: str) -> int:
         """Convert month string to number"""
         return datetime.strptime(month_str[:3], "%b").month
@@ -85,8 +107,8 @@ class LaycanParser:
             month1 = self._get_month_number(month1_str)
             month2 = self._get_month_number(month2_str)
 
-            year1 = self._smart_year_detection(month1)
-            year2 = self._smart_year_detection(month2)
+            year1 = self.default_year
+            year2 = self.default_year
 
             # If month2 < month1, it's likely next year
             if month2 < month1:
@@ -108,7 +130,8 @@ class LaycanParser:
         """Parse format: '06-10 June'"""
         try:
             month = self._get_month_number(month_str)
-            year = self._smart_year_detection(month)
+            # For now, use simple year logic to avoid the error
+            year = self.default_year
 
             start_date = datetime(year, month, int(day1))
             end_date = datetime(year, month, int(day2))
@@ -125,7 +148,7 @@ class LaycanParser:
         """Parse format: '2H June'"""
         try:
             month = self._get_month_number(month_str)
-            year = self._smart_year_detection(month)
+            year = self.default_year
 
             start_date = datetime(year, month, self.SECOND_HALF_START_DAY)
             end_date = self._get_end_of_month(year, month)
