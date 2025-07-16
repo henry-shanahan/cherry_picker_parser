@@ -9,3 +9,22 @@ pytz==2025.2
 six==1.17.0
 typing_extensions==4.14.0
 tzdata==2025.2
+# Shipping Data Parser - Required Dependencies
+# Core data processing
+pandas>=2.0.0
+numpy>=1.21.0
+
+# Excel file handling
+openpyxl>=3.1.0
+
+# Date parsing and handling
+python-dateutil>=2.8.0
+
+# XML processing (used by openpyxl)
+lxml>=4.9.0
+
+# Optional: For enhanced testing (if running performance tests)
+# psutil>=5.9.0
+
+# Optional: For code coverage reports
+# coverage>=7.0.0
