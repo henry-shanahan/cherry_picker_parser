@@ -1,7 +1,8 @@
 import os
 import sys
 from pathlib import Path
-from src.parser import ShippingDataParser
+sys.path.append('src')
+from shipping_parser import ShippingDataParser
 
 
 def get_pasted_data():
@@ -59,7 +60,7 @@ def main():
     print(f"✅ Successfully parsed {len(parsed_records)} records.")
 
     # 4. Save the clean data to an Excel file
-    output_filename = "parsed_shipping_data.xlsx"
+    output_filename = "../parsed_shipping_data.xlsx"
     print(f"💾 Saving the clean data to '{output_filename}'...")
 
     try:
